@@ -5,8 +5,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CROUD - Guilherme Gomes</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="app.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 30px;
+            color: #333;
+        }
+
+        /* Formulário de ações */
+        .formulario {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 8px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Tabela de usuários */
+        #tabela table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #tabela th, #tabela td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        #tabela th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #tabela tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        #tabela tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            color: #2c3e50;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            font-family: Arial, Helvetica, sans-serif;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 
 <body>
@@ -25,5 +105,133 @@
     <div id="tabela">
 
     </div>
+
+    <script>
+
+        function inicializarDados()
+        {
+
+            if (!localStorage.getItem("banco"))
+            {
+                const dados = [
+                    {id: 1, nome: "Usuario1", login: "usuario1", senha: "1234"},
+                    {id: 2, nome: "Usuario2", login: "usuario2", senha: "4321"},
+                    {id: 3, nome: "Usuario3", login: "usuario3", senha: "1234"}
+                ]
+
+                localStorage.setItem("banco",JSON.stringify(dados))
+            }
+        }
+
+        function obterBanco()
+        {
+            return JSON.parse(localStorage.getItem("banco")) || []
+        }
+
+        function salvarBanco(banco)
+        {
+            localStorage.setItem("banco",JSON.stringify(banco))
+        }
+
+        function mostrarTabela(dados)
+        {
+            const tabela = document.getElementById("tabela")
+
+            if(dados.tabela === 0)
+            {
+                tabela.innerHTML = "<p>Nenhum usuário encontrado.</p>";
+                return;
+            }
+
+            let html = "<table>";
+            html += "<tr><th>ID</th><th>Nome</th><th>Login</th>";
+
+            dados.forEach(d => {
+                html += `<tr>
+                            <td>${d.id}</td>
+                            <td>${d.nome}</td>
+                            <td>${d.login}</td>
+                        </tr>`;
+            });
+
+            html += "</table>";
+
+            tabela.innerHTML = html;
+
+
+        }
+
+        function buscar()
+        {
+            const termo = document.getElementById("pesquisar").value.toLowerCase()
+            const banco = obterBanco()
+
+            const resultado = banco.filter(item => 
+                                                    item.nome.toLowerCase().includes(termo)
+            )
+
+            mostrarTabela(resultado)
+
+        }
+
+        function cadastrar()
+        {
+            const nome = prompt("Nome: ")
+            const login = prompt("Login: ")
+            const senha = prompt("Senha: ")
+            const banco = obterBanco()
+
+            const novoId = banco.length ? banco[banco.length - 1].id + 1 : 1
+
+            const novoUsuario = {
+                id: novoId,
+                nome: nome,
+                login: login,
+                senha: senha
+            }
+
+            banco.push(novoUsuario)
+            salvarBanco(banco)
+            alert("Usuário cadastrado com sucesso!")
+            mostrarTabela(banco)
+        }
+
+        function atualizar()
+        {
+            const id = parseInt(prompt("ID do usuário para atualizar: "))
+
+            const banco = obterBanco()
+            const index = banco.findIndex(u => u.id === id)
+
+            if (index !== -1)
+            {
+                banco[index].nome = prompt("Novo nome:", banco[index].nome)
+                banco[index].login = prompt("Novo login: ", banco[index].login)
+
+                salvarBanco(banco)
+                mostrarTabela(banco)
+            }
+            else
+            {
+                alert("Usuário não encontrado!")
+            }
+        }
+
+        function apagar()
+        {
+            const id = parseInt(prompt("ID do usuário para apagar: "))
+
+            let banco = obterBanco()
+            banco = banco.filter(u => u.id !== id)
+
+            salvarBanco(banco)
+            mostrarTabela(banco)
+        }
+
+        inicializarDados();
+        mostrarTabela(obterBanco());
+
+
+    </script>
 </body>
 </html>
